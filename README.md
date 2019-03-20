@@ -1,4 +1,4 @@
-# Constitution d'une base de population pour les Départements d'Outre Mer français
+# Constitution d'une base de population pour les Départements d'Outre-Mer français
 
 ## Contexte
 
@@ -17,7 +17,7 @@ Romain MAZIERE (Arcep) - romain [point] maziere [chez] arcep [point] fr
 - [Population - recensement 2015 hors Mayotte](https://www.insee.fr/fr/statistiques/3627376) - Format : Excel (xls)
 - [Population - recensement 2012 pour Mayotte](https://www.insee.fr/fr/statistiques/2409395?sommaire=2409812) - Format : Excel (xls)
 
-## Languages
+## Langages
 
 - sql
 - bash
@@ -59,7 +59,7 @@ set PGDATABASE=dom_pop
 ### Cadastre
 
 1. Téléchargement des données,
-1. Dézippage,
+1. Extraction,
 1. Validation des géométries,
 1. Conversion de format
 
@@ -73,7 +73,7 @@ wget -O %sigDirectory%\etalab\cadastre\2019\974_bati.json.gz --no-check-certific
 wget -O %sigDirectory%\etalab\cadastre\2019\976_bati.json.gz --no-check-certificate https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/departements/976/cadastre-976-batiments.json.gz
 
 
-# Dézippage
+# Extraction
 
 "7zG" e 971_bati.json.gz
 "7zG" e 972_bati.json.gz
