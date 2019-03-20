@@ -10,6 +10,10 @@ Les bases de population existantes étant jugées peu fiables, il a été décid
 
 Romain MAZIERE (Arcep) - romain [point] maziere [chez] arcep [point] fr
 
+## Open Data
+
+Vous pouvez retrouver les bases produites sur [data.gouv](https://www.data.gouv.fr/fr/datasets/5b4371e2c751df037a54e146), car elles sont publiées en opendata !
+
 ## Données sources
 
 - Cadastre/bati [PCI retraité par Etalab](https://cadastre.data.gouv.fr/datasets/cadastre-etalab) - Format : GeoJSON, SRID : WGS84, EPSG : 4326
