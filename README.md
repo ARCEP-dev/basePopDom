@@ -19,7 +19,7 @@ Vous pouvez retrouver les bases produites sur [data.gouv](https://www.data.gouv.
 - Cadastre/bati [PCI retraité par Etalab](https://cadastre.data.gouv.fr/datasets/cadastre-etalab) - Format : GeoJSON, SRID : WGS84, EPSG : 4326
 - [Zones IRIS INSEE](https://www.data.gouv.fr/fr/datasets/contour-des-iris-insee-tout-en-un/) - Format : Shapefile, SRID : WGS84, EPSG : 4326
 - [Population - recensement 2015 hors Mayotte](https://www.insee.fr/fr/statistiques/3627376) - Format : Excel (xls)
-- [Population - recensement 2012 pour Mayotte](https://www.insee.fr/fr/statistiques/2409395?sommaire=2409812) - Format : Excel (xls)
+- [Population - recensement 2017 pour Mayotte](https://www.insee.fr/fr/statistiques/3286558) - Format : Excel (xls)
 
 ## Langages
 
