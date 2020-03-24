@@ -17,8 +17,8 @@ Vous pouvez retrouver les bases produites sur [data.gouv](https://www.data.gouv.
 ## Données sources
 
 - Cadastre/bati [PCI retraité par Etalab](https://cadastre.data.gouv.fr/datasets/cadastre-etalab) - Format : GeoJSON, SRID : WGS84, EPSG : 4326
-- [Zones IRIS INSEE](https://www.data.gouv.fr/fr/datasets/contour-des-iris-insee-tout-en-un/) - Format : Shapefile, SRID : WGS84, EPSG : 4326
-- [Population - recensement 2015 hors Mayotte](https://www.insee.fr/fr/statistiques/3627376) - Format : Excel (xls)
+- [Zones IRIS INSEE/IGN 2018](https://www.data.gouv.fr/fr/datasets/r/a1ce4923-4128-4334-8117-3df7f6b73ba4) - Format : Shapefile, SRID : WGS84, EPSG : 4326
+- [Population - recensement 2016 hors Mayotte](https://www.insee.fr/fr/statistiques/4228434) - Format : Excel (xls)
 - [Population - recensement 2017 pour Mayotte](https://www.insee.fr/fr/statistiques/3286558) - Format : Excel (xls)
 
 ## Langages
@@ -88,11 +88,11 @@ wget -O %sigDirectory%\etalab\cadastre\2019\976_bati.json.gz --no-check-certific
 
 # Validation des géométries et conversion de format
 
-ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\971_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\971_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune AS code_insee FROM \"971_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
-ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\972_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\972_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune AS code_insee FROM \"972_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
-ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\973_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\973_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune AS code_insee FROM \"973_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
-ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\974_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\974_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune AS code_insee FROM \"974_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
-ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\976_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\976_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune AS code_insee FROM \"976_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
+ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\971_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\971_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune  FROM \"971_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
+ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\972_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\972_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune  FROM \"972_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
+ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\973_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\973_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune  FROM \"973_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
+ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\974_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\974_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune  FROM \"974_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
+ogr2ogr -f "ESRI Shapefile" %sigDirectory%\etalab\cadastre\2019\976_bati_valid.shp %sigDirectory%\etalab\cadastre\2019\976_bati.json -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry, type, nom, commune  FROM \"976_bati\" WHERE GeometryType(ST_MakeValid(geometry)) IN ('POLYGON', 'MULTIPOLYGON')"
 ```
 
 #### Chargement des données en base
@@ -113,6 +113,30 @@ SELECT gid, geom, ST_Centroid(geom), type, nom, commune, Round(ST_Area(ST_Transf
 FROM import.bati;
 
 TRUNCATE TABLE import.bati;
+```
+
+#### Patch : création d'une table du bati avec gid renseignés et doublons de geometrie supprimés
+
+```sql
+CREATE TABLE public.bati_dedup(
+  gid serial,
+  geom geometry(MultiPolygon,4326),
+  centroid geometry(Point,4326),
+  type character varying(80),
+  nom character varying(80),
+  code_insee character varying(5),
+  area numeric,
+  pop numeric
+);
+
+INSERT INTO public.bati_dedup ( geom, centroid, type, nom, code_insee, area, pop)
+SELECT geom, centroid, type, nom, code_insee, area, pop
+FROM public.bati;
+
+DELETE FROM  bati_dedup a  USING bati_dedup b
+WHERE a.gid < b.gid AND a.geom = b.geom;
+
+TRUNCATE TABLE public.bati;
 ```
 
 
@@ -148,7 +172,7 @@ TRUNCATE TABLE import.recensement;
 
 ### Recensement de population Mayotte
 
-#### Chargement des données en base
+#### Chargement des données en base (alternative : recoder les libellés d'iris pour avoir la population de Mayotte par IRIS)
 
 ```sh
 psql -c "\copy import.recensement_mayotte FROM '%sigDirectory%\insee\recensement\2012\pop_mayotte_2012.csv' CSV HEADER DELIMITER ';';"
@@ -221,7 +245,6 @@ TRUNCATE import.commune;
 ```
 
 
-
 ### Workflow
 
 ```sql
@@ -232,16 +255,20 @@ TRUNCATE import.commune;
 UPDATE public.zone_iris AS z
 SET pop = (SELECT r.pop FROM public.recensement AS r WHERE r.dcomiris = z.dcomiris);
 
+-- Supprimer les iris avec population NULL
+DELETE FROM public.zone_iris
+WHERE pop IS NULL;
+
 -- Remonter la sum de surface batie, seulement les batis >= 20.0 m², au niveau de la zone iris
 UPDATE public.zone_iris z
 SET sum_area = (
 	SELECT SUM(b.area)
-	FROM public.bati b
+	FROM public.bati_dedup b
 	WHERE ST_Contains(z.geom, b.centroid)
 	AND b.area >= :bati_min_area);
 
 -- Ajout de la pop en fonction de la surface de bati
-UPDATE public.bati AS b
+UPDATE public.bati_dedup AS b
 SET pop = Round((
 	SELECT b.area / z.sum_area * z.pop
 	FROM public.zone_iris z
@@ -279,7 +306,7 @@ z.sum_area AS sum_iris_bati_area, z.pop AS iris_pop,
 SUM(b.area)::real AS sum_bati_area, SUM(b.pop)::real AS sum_bati_pop
 FROM public.recensement AS r
 INNER JOIN public.zone_iris AS z ON z.dcomiris = r.dcomiris
-INNER JOIN public.bati AS b ON ST_Contains(z.geom, b.centroid)
+INNER JOIN public.bati_dedup AS b ON ST_Contains(z.geom, b.centroid)
 WHERE r.code_dep = :'departement'
 GROUP BY r.dcomiris, r.code_reg, r.code_dep, r.code_insee, r.pop, z.sum_area, z.pop
 ORDER BY r.code_reg, r.code_dep, r.dcomiris;
@@ -287,16 +314,17 @@ ORDER BY r.code_reg, r.code_dep, r.dcomiris;
 
 
 ### Export en Shapefiles
+#### dans les systèmes de projection conventionnels
 ```sh
-pgsql2shp -f "%sigDirectory%\dom\base_pop_971" dom_pop "SELECT centroid AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '971%' AND code_insee NOT IN ('97123', '97127')"
+pgsql2shp -f "%sigDirectory%\dom\base_pop_971" dom_pop "SELECT ST_Transform(centroid, 32620) AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '971%' AND code_insee NOT IN ('97123', '97127')"
 
-pgsql2shp -f "%sigDirectory%\dom\base_pop_972" dom_pop "SELECT centroid AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '972%'"
+pgsql2shp -f "%sigDirectory%\dom\base_pop_972" dom_pop "SELECT ST_Transform(centroid, 32620) AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '972%'"
 
-pgsql2shp -f "%sigDirectory%\dom\base_pop_973" dom_pop "SELECT centroid AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '973%'"
+pgsql2shp -f "%sigDirectory%\dom\base_pop_973" dom_pop "SELECT ST_Transform(centroid, 2972) AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '973%'"
 
-pgsql2shp -f "%sigDirectory%\dom\base_pop_974" dom_pop "SELECT centroid AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '974%'"
+pgsql2shp -f "%sigDirectory%\dom\base_pop_974" dom_pop "SELECT ST_Transform(centroid, 2975) AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '974%'"
 
-pgsql2shp -f "%sigDirectory%\dom\base_pop_976" dom_pop "SELECT centroid AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '976%'"
+pgsql2shp -f "%sigDirectory%\dom\base_pop_976" dom_pop "SELECT ST_Transform(centroid, 32738) AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee LIKE '976%'"
 
 pgsql2shp -f "%sigDirectory%\dom\base_pop_977" dom_pop "SELECT centroid AS geom, type, code_insee, pop FROM bati WHERE geom IS NOT NULL AND pop IS NOT NULL AND pop > 0 AND code_insee = '97123'"
 
