@@ -11,6 +11,7 @@ CREATE DATABASE dom_pop
 
 \c dom_pop;
 
+
 BEGIN;
 
 CREATE EXTENSION postgis;
@@ -87,10 +88,10 @@ CREATE TABLE public.zone_iris(
   gid serial,
   geom geometry(MultiPolygon,4326),
   code_insee character varying(5),
-  nom_com character varying(45),
+  nom_com character varying(60),
   iris character varying(4),
   dcomiris character varying(9),
-  nom_iris character varying(45),
+  nom_iris character varying(60),
   typ_iris character varying(1),
   origine character varying(1),
   sum_area numeric,
