@@ -25,12 +25,12 @@ CREATE TABLE import.recensement(
   com character varying(5),
   typ_iris character varying(1),
   lab_iris character varying(1),
-  pop integer
+  pop double precision
 );
 
 CREATE TABLE import.recensement_mayotte(
   code_insee character varying(5),
-  pop integer
+  pop double precision
 );
 
 CREATE TABLE import.bati(
@@ -69,7 +69,7 @@ CREATE TABLE import.commune(
   insee_reg character varying(2),
   code_epci character varying(9),
   nom_com_m character varying(50),
-  population integer
+  population double precision
 );
 
 -- public
@@ -81,7 +81,7 @@ CREATE TABLE public.recensement(
   code_insee character varying(5),
   typ_iris character varying(1),
   lab_iris character varying(1),
-  pop integer
+  pop double precision
 );
 
 CREATE TABLE public.zone_iris(
@@ -95,7 +95,7 @@ CREATE TABLE public.zone_iris(
   typ_iris character varying(1),
   origine character varying(1),
   sum_area numeric,
-  pop integer
+  pop double precision
 );
 
 CREATE TABLE public.bati(
@@ -106,7 +106,7 @@ CREATE TABLE public.bati(
   nom character varying(80),
   code_insee character varying(5),
   area numeric,
-  pop numeric
+  pop double precision
 );
 
 CREATE INDEX public_bati_code_insee ON public.bati USING btree(code_insee);
