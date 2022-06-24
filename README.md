@@ -35,6 +35,7 @@ Les données finales sont au format shapefile, SRID local.
 Bâtiments :
 - Cadastre/bati depuis le [PCI retraité par Etalab](https://cadastre.data.gouv.fr/datasets/cadastre-etalab) - 2022 - Format : GeoJSON, SRID : WGS84, EPSG : 4326
 - En complément, pour le département 973 : couche BATIMENT de la [BD Topo® (IGN)](https://geoservices.ign.fr/ressource/174776) - 2022 - Format : Shapefile, SRID : RGFG95 / UTM zone 22N, EPSG : 2972
+
 Population :
 - [Population - recensement infracommunal 2018 France hors Mayotte + Collectivités d'outre-mer](https://www.insee.fr/fr/statistiques/5650720) - 2018 - Format : csv
 - [Population - recensement communal 2017 pour Mayotte](https://www.insee.fr/fr/statistiques/3286558) - 2017 - Format : Excel (xls)
@@ -191,11 +192,11 @@ Et le fichier xls pour :
 
 __A partir des fichiers Métropole et COM :__
 - dans le fichier COM, ajouter et remplir une colonne "dep" : Saint-Pierre-et-Miquelon = 975 (non utilisé) ; Saint-Barthélemy = 977 ; Saint-Martin = 978
-- traitement via ogr2ogr des fichiers métropole et COM pour exporter les colonnes utiles et ajouter des colonnes vides si besoin (IRIS, REG, DEP, COM, TYP_IRIS, LAB_IRIS, P13_POP) + les lignes correspondant à des départements d'OM.
+- traitement via ogr2ogr des fichiers métropole et COM pour exporter les colonnes utiles et ajouter des colonnes vides si besoin (IRIS, REG, DEP, COM, TYP_IRIS, LAB_IRIS, P13_POP) et sélectionner les lignes correspondant à des départements d'OM.
 
 ```sh
 # DOM
-ogr2ogr -f "CSV" %sigDirectory%\insee\recensement\2018\pop_2018.csv %sigDirectory%\insee\recensement\2018\base-ic-evol-struct-pop-2018.csv -sql "SELECT iris, null as reg, com, typ_iris, lab_iris, p18_pop AS pop FROM \"base-ic-evol-struct-pop-2018\" WHERE dep LIKE '97%'"
+ogr2ogr -f "CSV" %sigDirectory%\insee\recensement\2018\pop_2018.csv %sigDirectory%\insee\recensement\2018\base-ic-evol-struct-pop-2018.csv -sql "SELECT iris, null as reg, SUBSTR(com,1,2) as dep, com, typ_iris, lab_iris, p18_pop AS pop FROM \"base-ic-evol-struct-pop-2018\" WHERE com LIKE '97%'"
 
 # St Martin & St Barthélemy
 ogr2ogr -f "CSV" %sigDirectory%\insee\recensement\2018\pop_st_mb_2018.csv %sigDirectory%\insee\recensement\2018\base-ic-evol-struct-pop-2018-com.csv -sql "SELECT iris, null AS reg, dep, com, null AS typ_iris, lab_iris, p18_pop AS pop FROM \"base-ic-evol-struct-pop-2018-com\""
@@ -309,7 +310,7 @@ Télécharger l'archive "ADE-COG" et récupérer le shapefile des communes de Ma
 ##### Chargement des données en base en reprojetant en WGS84
 
 ```sh
-shp2pgsql -a -g geom -s 4471:4326 "%sigDirectory%\COMMUNE.shp" import.commune | psql
+shp2pgsql -c -g geom -s 4471:4326 "%sigDirectory%\COMMUNE.shp" import.commune | psql
 ```
 
 ##### Transfert des communes de Mayotte dans la table public.zone_iris

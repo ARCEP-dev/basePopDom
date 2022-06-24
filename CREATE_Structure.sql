@@ -55,23 +55,6 @@ CREATE TABLE import.zone_iris(
   origine character varying(1)
 );
 
-CREATE TABLE import.commune(
-  gid integer,
-  geom geometry(MultiPolygon,4326),
-  id character varying(24),
-  statut character varying(22),
-  insee_com character varying(5),
-  nom_com character varying(50),
-  insee_arr character varying(2),
-  nom_dep character varying(30),
-  insee_dep character varying(3),
-  nom_reg character varying(35),
-  insee_reg character varying(2),
-  code_epci character varying(9),
-  nom_com_m character varying(50),
-  population double precision
-);
-
 -- public
 CREATE TABLE public.recensement(
   id serial,
