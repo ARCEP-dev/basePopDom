@@ -323,9 +323,9 @@ FROM import.commune;
 TRUNCATE import.commune;
 ```
 
-#### 3.5.3. Contrôles et patch
+### 3.6. Contrôles et patch
 
-##### Contrôle de la concordance des iris entre sources et patch
+#### 3.6.1  Contrôle de la concordance des iris entre sources et patch
 
 Vérification de l'existance des iris du recensement dans la table zone_iris (hors Saint-Pierre-et-Miquelon)
 ```sql
@@ -335,6 +335,8 @@ WHERE z.dcomiris is null
 AND code_dep not in ('975')
 order by r.code_insee
 ```
+
+__Patch :__
 
 Pour 2021 uniquement : patch pour la commune de Maripasoula (97353). Plusieurs iris dans zone_iris, un seul iris dans le recensement. S'inspirer de ce patch si d'autres cas émergent.
 ```sql
@@ -346,7 +348,7 @@ WHERE z.code_insee like '97353'
 GROUP BY z.code_insee, z.nom_com, r.dcomiris;
 ```
 
-##### Contrôle des points de populations et des iris et patch
+#### 3.6.2 Contrôle des points de populations et des iris et patch
 
 Est-ce que tous les iris avec une population contiennent au moins un bâtiment sur lequel reporter cette population ?
 ```sql
@@ -357,9 +359,11 @@ GROUP BY z.code_insee, z.iris
 ORDER BY count(b.*)
 ```
 
+__Patch :__
+
 Pour 2022, un seul iris en Guyanne, dans la commune de Maripasoula, est peuplé selon le recensement, mais aucun bâtiment dans le cadastre n'est situé dans cette zone. Le bâti du cadastre, pour cet iris, est complété par des bâtiments issus de la BD Topo de l'IGN.
 
-Télécharger la BD Topo pour le département de la Guyane (973) :	https://geoservices.ign.fr/ressource/174776, et extraire uniquement le shapefile "BATIMENT" (BDTOPO_3-0_TOUSTHEMES_SHP_UTM22RGFG95_D973_2022-03-15\BDTOPO\1_DONNEES_LIVRAISON_2022-03-00081\BDT_3-0_SHP_UTM22RGFG95_D973-ED2022-03-15\BATI\BATIMENT.shp).
+Télécharger la BD Topo pour le département de la Guyane (973) :https://geoservices.ign.fr/ressource/174776, et extraire uniquement le shapefile "BATIMENT" (BDTOPO_3-0_TOUSTHEMES_SHP_UTM22RGFG95_D973_2022-03-15\BDTOPO\1_DONNEES_LIVRAISON_2022-03-00081\BDT_3-0_SHP_UTM22RGFG95_D973-ED2022-03-15\BATI\BATIMENT.shp).
 
 Chargement des données en base :
 ```sh
@@ -382,7 +386,7 @@ FROM public.bati_dedup_bdtopo_973;
 ```
 
 
-### 3.6. Création des points de population
+### 3.7. Création des points de population
 
 ```sql
 -- Hypothèse : nous considerons que les batis jusqu'à 20 m² n'ont pas d'usage d'habitation.
@@ -413,7 +417,7 @@ SET pop = Round((
 WHERE area >= :bati_min_area;
 ```
 
-### 3.7. Contrôles
+### 3.8. Contrôles
 
 ```sql
 -- Récap des batis filtrés
@@ -469,7 +473,7 @@ GROUP BY code_insee
 
 ```
 
-### 3.8. Création des fichiers finaux
+### 3.9. Création des fichiers finaux
 
 #### Export en Shapefiles
 
